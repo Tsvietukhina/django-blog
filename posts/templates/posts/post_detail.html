@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <h1>{{ post.title }}</h1>
+
+    <!--Edit/Delete Not Allowed for Not Author-->
+    {% if request.user == post.author %}
+        <a href="/post/{{ post.id }}/edit/" class="btn btn-warning mt-3">Edit Post</a>
+        <a href="/post/{{ post.id }}/delete/" class="btn btn-danger mt-3">Delete Post</a>
+    {% endif %}
+
+    <p>{{ post.body }}</p>
+
+    {% if post.image %}
+        <img src="{{ post.image.url }}" class="img-fluid mb-3">
+    {% endif %}
+
+    <p class="text-muted">Posted on {{ post.created_at }}</p>
+
+    <hr>
+
+    <!-- Add Comment Form -->
+    {% if request.user.is_authenticated %}
+
+        <h3>Add Comment</h3>
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="text" class="form-control" required></textarea>
+            <button class="btn btn-primary mt-2" type="submit">Submit</button>
+        </form>
+
+    {% else %}
+
+        <p class="text-muted mt-2">
+            You must <a href="/users/login/">login</a> to add a comment.
+        </p>
+
+    {% endif %}
+
+    <hr>
+
+    <!-- Display Comments -->
+    <h3>Comments</h3>
+
+    {% for comment in comments %}
+        <div class="card p-3 mb-3">
+                    <!-- Show author -->
+            <strong>
+                {% if comment.author %}
+                    {{ comment.author.username }}
+                {% else %}
+                    Anonymous
+                {% endif %}
+            </strong>
+            <br>
+
+            <!-- Comment text -->
+            <p>{{ comment.text }}</p>
+
+            <!-- Timestamp -->
+            <p class="text-muted">{{ comment.created_at }}</p>
+
+            {% if request.user == comment.author %}
+            <a href="/comment/{{ comment.id }}/delete/" class="btn btn-sm btn-danger mt-2">
+                Delete Comment
+            </a>
+            {% endif %}
+
+        </div>
+    {% empty %}
+        <p>No comments yet.</p>
+    {% endfor %}
+
+    <a href="/" class="btn btn-secondary mt-3">Back to posts</a>
+
+</div>
+
+{% endblock %}
